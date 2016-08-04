@@ -1,0 +1,80 @@
+---
+title: 'Statistical Inference Project - Part 2: Basic Inferential Data Analysis'
+author: "Saeed Nusri"
+date: "July 30, 2016"
+output: pdf_document
+---
+
+#2. Data Analysis
+
+In this section the ToothGrowth data is used for exploratory data analysis. 
+
+##Loading data
+
+The following codes reveal more information about the dataset.
+
+```{r laodingdata}
+#Loading the dataset 
+data(ToothGrowth)
+str(ToothGrowth)
+summary(ToothGrowth)
+unique(ToothGrowth$dose)
+unique(ToothGrowth$supp)
+```
+
+The data compreosis of 60 observations, length of odontoblasts in each of 10 guinea pigs at each of three dose levels of Vitamin C (0.5, 1 and 2 mg) with each of two delivery methods, orange juice or ascorbic acid (a form of vitamin C and coded as VC).
+
+##Data Analysis
+
+```{r factorleveldose}
+
+#Changing the dose variable into a factor class
+ToothGrowth$dose <- as.factor(ToothGrowth$dose)
+
+#Loading ggplot2 package for plotting box plots of the datasets to see trnds
+library(ggplot2)
+g <- ggplot(data=ToothGrowth, aes(x=dose, y=len)) +
+        geom_boxplot(aes(fill=dose)) +facet_grid(~supp) + 
+        xlab("Dose") + ylab("Length of Odontoblasts") + 
+        ggtitle("Length of Odontoblasts vs. Dose")
+
+print(g)
+```
+
+It can be concluded that there is a clear positive correlation between the tooth length and the dose levels of Vitamin C, for both delivery methods.
+
+One interesting question that can also be addressed is whether the supplement type (i.e. orange juice or ascorbic acid) has any effect on the tooth length.
+
+```{r}
+t.test(len ~ supp, paired = F, var.equal = F, data = ToothGrowth)
+```
+
+The p-value is 0.06 and the confidence interval contains zero. Hence, we can not reject the null hypothesis, which states that the different supplement types have no effect on tooth length.
+
+```{r loadingdplyr, message=FALSE}
+#Loading dplyr for using the 'filter' function
+
+library(dplyr)
+
+```
+
+```{r segregation}
+
+#Segragating the ToothGrowth data with the different dosage of OJ and VC
+dose1 <- filter(ToothGrowth, dose == 0.5)
+dose2 <- filter(ToothGrowth, dose == 1.0)
+dose3 <- filter(ToothGrowth, dose == 2.0)
+
+
+#Carrying out t tes
+t.test(len ~ supp, paired = F, var.equal = F, data = dose1)
+t.test(len ~ supp, paired = F, var.equal = F, data = dose2)
+t.test(len ~ supp, paired = F, var.equal = F, data = dose3)
+
+```
+
+Since the 95% confidence interval (CI) of the first two tests, of doses 1.0 mg and 1.5 mg, do not include 0, it tells us there is a statistically significant difference between the supplementing orange juice and ascorbic acid. Moreover, a low p-value allows the rejection of the null hypothesis. However, the impact diminishes when the dosage is above certain level, in our case, 2 mg.
+
+##Conclusion
+
+Based on the analysis under the assumption that the supplements, orange juice and ascorbic acid, were independently and identically distributed among the subjects, we can conclude that the orange juice, when adminstered with moderate dosage would have a significant impact on the ondontoblasts on Guinea pigs.
